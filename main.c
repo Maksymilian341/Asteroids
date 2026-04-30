@@ -15,8 +15,8 @@ int main(void) {
     InitWindow(screenWidth, screenHeight, "Asteroids - Maks");
 
     Player player = { 0 };
-    player.position = (Vector2){ screenWidth/2, screenHeight/2 };
-    player.velocity = (Vector2){ 0, 0 };
+    player.position = (Vector2){screenWidth/2, screenHeight/2};
+    player.velocity = (Vector2){0, 0};
     player.rotation = 0.0f; 
     player.radius = 15.0f;
 
