@@ -28,7 +28,7 @@ int main(void) {
     player.rotation = 0.0f; 
     player.radius = 15.0f;
 
-    Bullet bullets[MAX_BULLETS] = {0};
+    Bullet bullets[maxBullets] = {0};
 
     SetTargetFPS(60); 
 
@@ -96,13 +96,13 @@ int main(void) {
             };
 
             Vector2 v2 = { 
-                player.position.x + cosf((player.rotation + 30) * DEG2RAD) * player.radius, 
-                player.position.y + sinf((player.rotation + 30) * DEG2RAD) * player.radius 
+                player.position.x + cosf((player.rotation + 45) * DEG2RAD) * player.radius, 
+                player.position.y + sinf((player.rotation + 45) * DEG2RAD) * player.radius 
             };
 
             Vector2 v3 = { 
-                player.position.x + cosf((player.rotation + 150) * DEG2RAD) * player.radius, 
-                player.position.y + sinf((player.rotation + 150) * DEG2RAD) * player.radius 
+                player.position.x + cosf((player.rotation + 135) * DEG2RAD) * player.radius, 
+                player.position.y + sinf((player.rotation + 135) * DEG2RAD) * player.radius 
             };
 
             DrawTriangleLines(v1, v2, v3, RAYWHITE);
