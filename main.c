@@ -27,6 +27,14 @@ int main(void) {
         BeginDrawing();
             ClearBackground(BLACK);
             DrawPolyLines(player.position, 3, player.radius, player.rotation, RAYWHITE);
+
+            if (IsKeyDown(KEY_UP)) {
+            player.velocity.x += cosf(player.rotation * DEG2RAD) * 0.1f;
+            player.velocity.y += sinf(player.rotation * DEG2RAD) * 0.1f;
+        }
+
+            player.position.x += player.velocity.x;
+            player.position.y += player.velocity.y;
         EndDrawing();
     }
 
