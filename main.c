@@ -42,7 +42,6 @@ int main(void) {
     Bullet bullets[maxBullets] = {0};
     Asteroids asteroids[maxAsteroids] = {0};
 
-
     SetTargetFPS(60); 
 
     while (!WindowShouldClose()){
@@ -150,7 +149,14 @@ int main(void) {
                 }
                 }
             }
-        
+            
+            for(int i = 0; i < maxAsteroids; i++){
+                if(asteroids[i].active){
+                    if(CheckCollisionCircles(player.position, player.radius, asteroids[i].position, asteroids[i].radius)){
+                    /* return 0; */
+                    }
+                }
+            }
 
         BeginDrawing();
             ClearBackground(BLACK);
@@ -179,6 +185,7 @@ int main(void) {
                     DrawCircleV(bullets[i].position, 2, RED);
                 }   
             }
+            /* asteroidy */
             for (int i = 0; i < maxAsteroids;i++){
                 if (asteroids[i].active){
                     DrawPolyLines(asteroids[i].position, 7, asteroids[i].radius, asteroids[i].rotation, RAYWHITE);
