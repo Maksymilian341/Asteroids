@@ -7,7 +7,7 @@
 #define screenWidth 800
 #define screenHeight 600
 #define maxBullets 10
-#define maxAsteroids 15
+#define maxAsteroids 10
 
 
 typedef struct Player{
@@ -56,15 +56,15 @@ int main(void) {
                 player.rotation += 4.5f; 
             }
 
-            /* podstawowy ruch */
+            /* podstawowy ruch nadanie predkosci i kontrola wyjezdzania z mapy */
             if (IsKeyDown(KEY_UP)){
             player.velocity.x += cosf((player.rotation - 90) * DEG2RAD) * 0.1f;
             player.velocity.y += sinf((player.rotation - 90) * DEG2RAD) * 0.1f;
             }
-
+            
             player.position.x += player.velocity.x;
             player.position.y += player.velocity.y;
-
+            
             if (player.position.x > screenWidth){
                 player.position.x = 0;
             } 
@@ -79,7 +79,7 @@ int main(void) {
                 player.position.y = screenHeight;
             }
             
-            /* wystrzeliwanie bulleta */
+            /* wystrzeliwanie bulleta i nadanie mu predkosci */
             if (IsKeyPressed(KEY_SPACE)){
                 for (int i = 0;i < maxBullets;i++){
                     if (!bullets[i].active){
@@ -107,7 +107,7 @@ int main(void) {
                 }
             }
 
-            /* generowanie asteroid */
+            /* generowanie asteroid w losowym narozniku ekranu */
             for (int i = 0;i < maxAsteroids;i++){
                 if (!asteroids[i].active){
                     int temp = GetRandomValue(0, 3);
@@ -149,14 +149,38 @@ int main(void) {
                 }
                 }
             }
-            
+            /* kolizja asteroida-statek działa na hitboxach okregow i odleglosci srednic */
             for(int i = 0; i < maxAsteroids; i++){
                 if(asteroids[i].active){
                     if(CheckCollisionCircles(player.position, player.radius, asteroids[i].position, asteroids[i].radius)){
-                    /* return 0; */
+                        /*return 0;*/ 
                     }
                 }
             }
+
+            /* kolizja pocisk-asteroida za pomoca kolizji okregu z punktem */
+            for(int i = 0; i < maxAsteroids;i++){
+                for(int j = 0; j < maxBullets; j++){
+                    if(CheckCollisionPointCircle(bullets[j].position, asteroids[i].position, asteroids[i].radius)){
+                    asteroids[i].active = false;
+                    bullets[j].active = false;
+                    }
+                }
+            }
+            
+            /* (bardzo udane :) )proby zapobiegniecia nieskonczonej predkosci statku */
+            player.velocity.x *=  0.99f;
+            player.velocity.y *= 0.99f;
+            
+            float maxSpeed = 3.5f;
+            float currentSpeed = sqrtf(player.velocity.x * player.velocity.x + player.velocity.y * player.velocity.y);
+            if(currentSpeed > maxSpeed){
+                player.velocity.x = (player.velocity.x / currentSpeed) * maxSpeed;
+                player.velocity.y = (player.velocity.y / currentSpeed) * maxSpeed;
+            }
+
+            player.velocity.x = player.velocity.x - player.velocity.x * 0.01f;
+            player.velocity.y = player.velocity.y - player.velocity.y * 0.01f;
 
         BeginDrawing();
             ClearBackground(BLACK);
