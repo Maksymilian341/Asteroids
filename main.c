@@ -153,7 +153,7 @@ int main(void) {
             for(int i = 0; i < maxAsteroids; i++){
                 if(asteroids[i].active){
                     if(CheckCollisionCircles(player.position, player.radius, asteroids[i].position, asteroids[i].radius)){
-                        /*return 0;*/ 
+                        return 0;
                     }
                 }
             }
