@@ -7,7 +7,9 @@
 #define screenWidth 800
 #define screenHeight 600
 #define maxBullets 10
-#define maxAsteroids 10
+#define maxSmallAsteroids 6
+#define maxMediumAsteroids 5
+#define maxBigAsteroids 3
 
 
 typedef struct Player{
@@ -40,7 +42,9 @@ int main(void) {
     player.radius = 15.0f;
 
     Bullet bullets[maxBullets] = {0};
-    Asteroids asteroids[maxAsteroids] = {0};
+    Asteroids small_asteroids[maxSmallAsteroids] = {0};
+    Asteroids medium_asteroids[maxMediumAsteroids] = {0};
+    Asteroids big_asteroids[maxBigAsteroids] = {0};
 
     SetTargetFPS(60); 
 
@@ -108,61 +112,165 @@ int main(void) {
             }
 
             /* generowanie asteroid w losowym narozniku ekranu */
-            for (int i = 0;i < maxAsteroids;i++){
-                if (!asteroids[i].active){
-                    int temp = GetRandomValue(0, 3);
-                    asteroids[i].active = true;
+            for (int i = 0;i < maxBigAsteroids;i++){
+                if (!big_asteroids[i].active){
+                    int temp = GetRandomValue(0, 1);
+                    big_asteroids[i].active = true;
                     if(temp == 0){
-                    asteroids[i].position.x = 0;
-                    asteroids[i].position.y = 0;
+                    big_asteroids[i].position.x = GetRandomValue(0,screenWidth);
+                    big_asteroids[i].position.y = screenHeight;
                     }
                     if(temp == 1){
-                    asteroids[i].position.x = 0;
-                    asteroids[i].position.y = screenHeight;
+                    big_asteroids[i].position.x = GetRandomValue(0,screenWidth);;
+                    big_asteroids[i].position.y = 0;
                     }
+                    /*
                     if(temp == 2){
-                    asteroids[i].position.x = screenWidth;
-                    asteroids[i].position.y = 0;
+                    big_asteroids[i].position.x = screenWidth;
+                    big_asteroids[i].position.y = 0;
                     }
                     if(temp == 3){
-                    asteroids[i].position.x = screenWidth;
-                    asteroids[i].position.y = screenHeight;
+                    big_asteroids[i].position.x = screenWidth;
+                    big_asteroids[i].position.y = screenHeight;
                     }
-                    asteroids[i].velocity.x = cosf((GetRandomValue(0, 360)) * DEG2RAD) * 2.5f;
-                    asteroids[i].velocity.y = sinf(GetRandomValue(0, 360) * DEG2RAD) * 2.5f;
+                    */
+                    big_asteroids[i].velocity.x = cosf((GetRandomValue(0, 360)) * DEG2RAD) * 1.0f;
+                    big_asteroids[i].velocity.y = sinf(GetRandomValue(0, 360) * DEG2RAD) * 1.0f;
 
-                    asteroids[i].rotation = 2.0f; 
-                    asteroids[i].radius = 30.0f;
+                    big_asteroids[i].rotation = 2.0f; 
+                    big_asteroids[i].radius = 30.0f;
                     break; 
                 }
             }
             
-            /* Usuwanie asteroid ktore opuscily plansze */
-            for (int i = 0; i < maxAsteroids; i++){
-                if (asteroids[i].active){
-                    asteroids[i].position.x += asteroids[i].velocity.x;
-                    asteroids[i].position.y += asteroids[i].velocity.y;
+            for (int i = 0;i < maxMediumAsteroids;i++){
+                if (!medium_asteroids[i].active){
+                    int temp = GetRandomValue(0, 1);
+                    medium_asteroids[i].active = true;
+                    if(temp == 0){
+                    medium_asteroids[i].position.x = GetRandomValue(0,screenWidth);
+                    medium_asteroids[i].position.y = screenHeight;
+                    }
+                    if(temp == 1){
+                    medium_asteroids[i].position.x = GetRandomValue(0,screenWidth);;
+                    medium_asteroids[i].position.y = 0;
+                    }
+                    medium_asteroids[i].velocity.x = cosf((GetRandomValue(0, 360)) * DEG2RAD) * 2.0f;
+                    medium_asteroids[i].velocity.y = sinf(GetRandomValue(0, 360) * DEG2RAD) * 2.0f;
 
-                if (asteroids[i].position.x < 0 || asteroids[i].position.x > screenWidth ||
-                    asteroids[i].position.y < 0 || asteroids[i].position.y > screenHeight){
-                    asteroids[i].active = false;
+                    medium_asteroids[i].rotation = 2.0f; 
+                    medium_asteroids[i].radius = 20.0f;
+                    break; 
+                }
+            }
+            
+            for (int i = 0;i < maxSmallAsteroids;i++){
+                if (!small_asteroids[i].active){
+                    int temp = GetRandomValue(0, 1);
+                    small_asteroids[i].active = true;
+                    if(temp == 0){
+                    small_asteroids[i].position.x = GetRandomValue(0,screenWidth);
+                    small_asteroids[i].position.y = screenHeight;
+                    }
+                    if(temp == 1){
+                    small_asteroids[i].position.x = GetRandomValue(0,screenWidth);;
+                    small_asteroids[i].position.y = 0;
+                    }
+                    small_asteroids[i].velocity.x = cosf((GetRandomValue(0, 360)) * DEG2RAD) * 2.0f;
+                    small_asteroids[i].velocity.y = sinf(GetRandomValue(0, 360) * DEG2RAD) * 2.0f;
+
+                    small_asteroids[i].rotation = 2.0f; 
+                    small_asteroids[i].radius = 10.0f;
+                    break; 
+                }
+            }
+            /* Usuwanie big asteroid ktore opuscily plansze */
+            for (int i = 0; i < maxBigAsteroids; i++){
+                if (big_asteroids[i].active){
+                    big_asteroids[i].position.x += big_asteroids[i].velocity.x;
+                    big_asteroids[i].position.y += big_asteroids[i].velocity.y;
+
+                if (big_asteroids[i].position.x < 0 || big_asteroids[i].position.x > screenWidth ||
+                    big_asteroids[i].position.y < 0 || big_asteroids[i].position.y > screenHeight){
+                    big_asteroids[i].active = false;
                 }
                 }
             }
+
+            /* Usuwanie medium asteroid ktore opuscily plansze */
+            for (int i = 0; i < maxMediumAsteroids; i++){
+                if (medium_asteroids[i].active){
+                    medium_asteroids[i].position.x += medium_asteroids[i].velocity.x;
+                    medium_asteroids[i].position.y += medium_asteroids[i].velocity.y;
+
+                if (medium_asteroids[i].position.x < 0 || medium_asteroids[i].position.x > screenWidth ||
+                    medium_asteroids[i].position.y < 0 || medium_asteroids[i].position.y > screenHeight){
+                    medium_asteroids[i].active = false;
+                }
+                }
+            }
+
+             /* Usuwanie small asteroid ktore opuscily plansze */
+            for (int i = 0; i < maxSmallAsteroids; i++){
+                if (small_asteroids[i].active){
+                    small_asteroids[i].position.x += small_asteroids[i].velocity.x;
+                    small_asteroids[i].position.y += small_asteroids[i].velocity.y;
+
+                if (small_asteroids[i].position.x < 0 || small_asteroids[i].position.x > screenWidth ||
+                    small_asteroids[i].position.y < 0 || small_asteroids[i].position.y > screenHeight){
+                    small_asteroids[i].active = false;
+                }
+                }
+            }
+
             /* kolizja asteroida-statek działa na hitboxach okregow i odleglosci srednic */
-            for(int i = 0; i < maxAsteroids; i++){
-                if(asteroids[i].active){
-                    if(CheckCollisionCircles(player.position, player.radius, asteroids[i].position, asteroids[i].radius)){
+            for(int i = 0; i < maxBigAsteroids; i++){
+                if(big_asteroids[i].active){
+                    if(CheckCollisionCircles(player.position, player.radius, big_asteroids[i].position, big_asteroids[i].radius)){
+                        return 0;
+                    }
+                }
+            }
+
+            for(int i = 0; i < maxMediumAsteroids; i++){
+                if(medium_asteroids[i].active){
+                    if(CheckCollisionCircles(player.position, player.radius, medium_asteroids[i].position, medium_asteroids[i].radius)){
+                        return 0;
+                    }
+                }
+            }
+
+            for(int i = 0; i < maxSmallAsteroids; i++){
+                if(small_asteroids[i].active){
+                    if(CheckCollisionCircles(player.position, player.radius, small_asteroids[i].position, small_asteroids[i].radius)){
                         return 0;
                     }
                 }
             }
 
             /* kolizja pocisk-asteroida za pomoca kolizji okregu z punktem */
-            for(int i = 0; i < maxAsteroids;i++){
+            for(int i = 0; i < maxBigAsteroids;i++){
                 for(int j = 0; j < maxBullets; j++){
-                    if(CheckCollisionPointCircle(bullets[j].position, asteroids[i].position, asteroids[i].radius)){
-                    asteroids[i].active = false;
+                    if(CheckCollisionPointCircle(bullets[j].position, big_asteroids[i].position, big_asteroids[i].radius)){
+                    big_asteroids[i].active = false;
+                    bullets[j].active = false;
+                    }
+                }
+            }
+
+            for(int i = 0; i < maxMediumAsteroids;i++){
+                for(int j = 0; j < maxBullets; j++){
+                    if(CheckCollisionPointCircle(bullets[j].position, medium_asteroids[i].position, medium_asteroids[i].radius)){
+                    medium_asteroids[i].active = false;
+                    bullets[j].active = false;
+                    }
+                }
+            }
+
+            for(int i = 0; i < maxSmallAsteroids;i++){
+                for(int j = 0; j < maxBullets; j++){
+                    if(CheckCollisionPointCircle(bullets[j].position, small_asteroids[i].position, small_asteroids[i].radius)){
+                    small_asteroids[i].active = false;
                     bullets[j].active = false;
                     }
                 }
@@ -210,9 +318,21 @@ int main(void) {
                 }   
             }
             /* asteroidy */
-            for (int i = 0; i < maxAsteroids;i++){
-                if (asteroids[i].active){
-                    DrawPolyLines(asteroids[i].position, 7, asteroids[i].radius, asteroids[i].rotation, RAYWHITE);
+            for (int i = 0; i < maxBigAsteroids;i++){
+                if (big_asteroids[i].active){
+                    DrawPolyLines(big_asteroids[i].position, 7, big_asteroids[i].radius, big_asteroids[i].rotation, RAYWHITE);
+                }   
+            }
+
+            for (int i = 0; i < maxMediumAsteroids;i++){
+                if (medium_asteroids[i].active){
+                    DrawPolyLines(medium_asteroids[i].position, 7, medium_asteroids[i].radius, medium_asteroids[i].rotation, RAYWHITE);
+                }   
+            }
+
+            for (int i = 0; i < maxSmallAsteroids;i++){
+                if (small_asteroids[i].active){
+                    DrawPolyLines(small_asteroids[i].position, 7, small_asteroids[i].radius, small_asteroids[i].rotation, RAYWHITE);
                 }   
             }
 
