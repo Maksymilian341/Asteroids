@@ -34,6 +34,41 @@ typedef struct Asteroids{
     bool active;
 }Asteroids;
 
+void UpdatePlayer(Player *player){
+    /* rotacja w lewo*/
+            if (IsKeyDown(KEY_LEFT)){
+                player->rotation -= 4.5f;
+            }
+
+            /* rotacja w prawo */
+            if (IsKeyDown(KEY_RIGHT)){
+                player->rotation += 4.5f; 
+            }
+
+            /* podstawowy ruch nadanie predkosci i kontrola wyjezdzania z mapy */
+            if (IsKeyDown(KEY_UP)){
+            player->velocity.x += cosf((player->rotation - 90) * DEG2RAD) * 0.1f;
+            player->velocity.y += sinf((player->rotation - 90) * DEG2RAD) * 0.1f;
+            }
+            
+            player->position.x += player->velocity.x;
+            player->position.y += player->velocity.y;
+            
+            if (player->position.x > screenWidth){
+                player->position.x = 0;
+            } 
+            else if (player->position.x < 0){
+                player->position.x = screenWidth;
+            }
+
+            if (player->position.y > screenHeight){
+                player->position.y = 0;
+            } 
+            else if (player->position.y < 0){
+                player->position.y = screenHeight;
+            }
+    }
+
 int main(void) {
     InitWindow(screenWidth, screenHeight, "Asteroids - Maks");
     Player player = {0};
@@ -58,39 +93,7 @@ int main(void) {
             float dt = GetFrameTime();
             if(shoot_cooldown > 0.0f) shoot_cooldown -= dt;
 
-            /* rotacja w lewo*/
-            if (IsKeyDown(KEY_LEFT)){
-                player.rotation -= 4.5f;
-            }
-
-            /* rotacja w prawo */
-            if (IsKeyDown(KEY_RIGHT)){
-                player.rotation += 4.5f; 
-            }
-
-            /* podstawowy ruch nadanie predkosci i kontrola wyjezdzania z mapy */
-            if (IsKeyDown(KEY_UP)){
-            player.velocity.x += cosf((player.rotation - 90) * DEG2RAD) * 0.1f;
-            player.velocity.y += sinf((player.rotation - 90) * DEG2RAD) * 0.1f;
-            }
-            
-            player.position.x += player.velocity.x;
-            player.position.y += player.velocity.y;
-            
-            if (player.position.x > screenWidth){
-                player.position.x = 0;
-            } 
-            else if (player.position.x < 0){
-                player.position.x = screenWidth;
-            }
-
-            if (player.position.y > screenHeight){
-                player.position.y = 0;
-            } 
-            else if (player.position.y < 0){
-                player.position.y = screenHeight;
-            }
-            
+           UpdatePlayer(&player);
             /* wystrzeliwanie bulleta i nadanie mu predkosci */
             if (IsKeyPressed(KEY_SPACE)){
                 if(shoot_cooldown <= 0.0f){
