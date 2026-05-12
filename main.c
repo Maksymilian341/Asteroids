@@ -17,6 +17,7 @@ typedef struct Player{
     Vector2 velocity;
     float rotation;
     float radius;
+    int score;
 }Player;
 
 typedef struct Bullet{
@@ -40,6 +41,7 @@ int main(void) {
     player.velocity = (Vector2){0, 0};
     player.rotation = 0.0f; 
     player.radius = 15.0f;
+    player.score = 0;
 
     Bullet bullets[maxBullets] = {0};
     Asteroids small_asteroids[maxSmallAsteroids] = {0};
@@ -48,7 +50,13 @@ int main(void) {
 
     SetTargetFPS(60); 
 
+    float shoot_cooldown = 0.0f;
+    
+
     while (!WindowShouldClose()){
+
+            float dt = GetFrameTime();
+            if(shoot_cooldown > 0.0f) shoot_cooldown -= dt;
 
             /* rotacja w lewo*/
             if (IsKeyDown(KEY_LEFT)){
@@ -85,6 +93,7 @@ int main(void) {
             
             /* wystrzeliwanie bulleta i nadanie mu predkosci */
             if (IsKeyPressed(KEY_SPACE)){
+                if(shoot_cooldown <= 0.0f){
                 for (int i = 0;i < maxBullets;i++){
                     if (!bullets[i].active){
                         bullets[i].active = true;
@@ -97,6 +106,8 @@ int main(void) {
                         break; 
                     }
                 }
+                }
+                shoot_cooldown = 0.17f;
             }
             /* Usuwanie bulletow ktore opuscily plansze */
             for (int i = 0; i < maxBullets; i++){
@@ -250,28 +261,37 @@ int main(void) {
 
             /* kolizja pocisk-asteroida za pomoca kolizji okregu z punktem */
             for(int i = 0; i < maxBigAsteroids;i++){
+                if (!big_asteroids[i].active) continue;
                 for(int j = 0; j < maxBullets; j++){
+                    if (!bullets[j].active) continue;
                     if(CheckCollisionPointCircle(bullets[j].position, big_asteroids[i].position, big_asteroids[i].radius)){
                     big_asteroids[i].active = false;
                     bullets[j].active = false;
+                    player.score = player.score + 1;
                     }
                 }
             }
 
             for(int i = 0; i < maxMediumAsteroids;i++){
+                if (!medium_asteroids[i].active) continue;
                 for(int j = 0; j < maxBullets; j++){
+                    if (!bullets[j].active) continue;
                     if(CheckCollisionPointCircle(bullets[j].position, medium_asteroids[i].position, medium_asteroids[i].radius)){
                     medium_asteroids[i].active = false;
                     bullets[j].active = false;
+                    player.score = player.score + 1;
                     }
                 }
             }
 
             for(int i = 0; i < maxSmallAsteroids;i++){
+                if (!small_asteroids[i].active) continue;
                 for(int j = 0; j < maxBullets; j++){
+                    if (!bullets[j].active) continue;
                     if(CheckCollisionPointCircle(bullets[j].position, small_asteroids[i].position, small_asteroids[i].radius)){
                     small_asteroids[i].active = false;
                     bullets[j].active = false;
+                    player.score = player.score + 1;
                     }
                 }
             }
@@ -292,6 +312,7 @@ int main(void) {
 
         BeginDrawing();
             ClearBackground(BLACK);
+            DrawText(TextFormat("Score: %08i", player.score), 10, 10, 20, RED);
 
             /* rysowanie trojkata rownoramiennego */
             Vector2 v1 = { 
