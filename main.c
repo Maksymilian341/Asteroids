@@ -69,6 +69,27 @@ void UpdatePlayer(Player *player){
             }
     }
 
+void Shooting(float *shoot_cooldown, Player *player, Bullet *bullets){
+/* wystrzeliwanie bulleta i nadanie mu predkosci */
+    if (IsKeyPressed(KEY_SPACE)){
+        if(*shoot_cooldown <= 0.0f){
+            for (int i = 0;i < maxBullets;i++){
+                    if (!bullets[i].active){
+                        bullets[i].active = true;
+
+                        bullets[i].position.x = player->position.x + cosf((player->rotation - 90) * DEG2RAD) * player->radius;
+                        bullets[i].position.y = player->position.y + sinf((player->rotation - 90) * DEG2RAD) * player->radius;
+                        
+                        bullets[i].velocity.x = cosf((player->rotation - 90) * DEG2RAD) * 7.0f;
+                        bullets[i].velocity.y = sinf((player->rotation - 90) * DEG2RAD) * 7.0f;
+                        break; 
+                    }
+            }
+        }
+                *shoot_cooldown = 0.17f;
+    }
+}
+    
 int main(void) {
     InitWindow(screenWidth, screenHeight, "Asteroids - Maks");
     Player player = {0};
@@ -94,24 +115,11 @@ int main(void) {
             if(shoot_cooldown > 0.0f) shoot_cooldown -= dt;
 
            UpdatePlayer(&player);
-            /* wystrzeliwanie bulleta i nadanie mu predkosci */
-            if (IsKeyPressed(KEY_SPACE)){
-                if(shoot_cooldown <= 0.0f){
-                for (int i = 0;i < maxBullets;i++){
-                    if (!bullets[i].active){
-                        bullets[i].active = true;
 
-                        bullets[i].position.x = player.position.x + cosf((player.rotation - 90) * DEG2RAD) * player.radius;
-                        bullets[i].position.y = player.position.y + sinf((player.rotation - 90) * DEG2RAD) * player.radius;
-                        
-                        bullets[i].velocity.x = cosf((player.rotation - 90) * DEG2RAD) * 7.0f;
-                        bullets[i].velocity.y = sinf((player.rotation - 90) * DEG2RAD) * 7.0f;
-                        break; 
-                    }
-                }
-                }
-                shoot_cooldown = 0.17f;
-            }
+           Shooting(&shoot_cooldown, &player, &bullets);
+
+            /* wystrzeliwanie bulleta i nadanie mu predkosci */
+            
             /* Usuwanie bulletow ktore opuscily plansze */
             for (int i = 0; i < maxBullets; i++){
                 if (bullets[i].active){
@@ -241,7 +249,7 @@ int main(void) {
             for(int i = 0; i < maxBigAsteroids; i++){
                 if(big_asteroids[i].active){
                     if(CheckCollisionCircles(player.position, player.radius, big_asteroids[i].position, big_asteroids[i].radius)){
-                        return 0;
+                        //return 0;
                     }
                 }
             }
@@ -249,7 +257,7 @@ int main(void) {
             for(int i = 0; i < maxMediumAsteroids; i++){
                 if(medium_asteroids[i].active){
                     if(CheckCollisionCircles(player.position, player.radius, medium_asteroids[i].position, medium_asteroids[i].radius)){
-                        return 0;
+                        //return 0;
                     }
                 }
             }
@@ -257,7 +265,7 @@ int main(void) {
             for(int i = 0; i < maxSmallAsteroids; i++){
                 if(small_asteroids[i].active){
                     if(CheckCollisionCircles(player.position, player.radius, small_asteroids[i].position, small_asteroids[i].radius)){
-                        return 0;
+                        //return 0;
                     }
                 }
             }
@@ -270,7 +278,7 @@ int main(void) {
                     if(CheckCollisionPointCircle(bullets[j].position, big_asteroids[i].position, big_asteroids[i].radius)){
                     big_asteroids[i].active = false;
                     bullets[j].active = false;
-                    player.score = player.score + 1;
+                    player.score = player.score + 50;
                     }
                 }
             }
@@ -282,7 +290,7 @@ int main(void) {
                     if(CheckCollisionPointCircle(bullets[j].position, medium_asteroids[i].position, medium_asteroids[i].radius)){
                     medium_asteroids[i].active = false;
                     bullets[j].active = false;
-                    player.score = player.score + 1;
+                    player.score = player.score + 50;
                     }
                 }
             }
@@ -294,7 +302,7 @@ int main(void) {
                     if(CheckCollisionPointCircle(bullets[j].position, small_asteroids[i].position, small_asteroids[i].radius)){
                     small_asteroids[i].active = false;
                     bullets[j].active = false;
-                    player.score = player.score + 1;
+                    player.score = player.score + 50;
                     }
                 }
             }
@@ -315,7 +323,7 @@ int main(void) {
 
         BeginDrawing();
             ClearBackground(BLACK);
-            DrawText(TextFormat("Score: %08i", player.score), 10, 10, 20, RED);
+            DrawText(TextFormat("Score: %08i", player.score), 10, 10, 20, RAYWHITE);
 
             /* rysowanie trojkata rownoramiennego */
             Vector2 v1 = { 
@@ -338,7 +346,7 @@ int main(void) {
             /* strzelanie */
             for (int i = 0; i < maxBullets;i++){
                 if (bullets[i].active){
-                    DrawCircleV(bullets[i].position, 2, RED);
+                    DrawCircleV(bullets[i].position, 2, RAYWHITE);
                 }   
             }
             /* asteroidy */
