@@ -221,11 +221,11 @@ void DeleteAsteroids(Asteroids *big_asteroids, Asteroids *medium_asteroids, Aste
             }
 }
 
-void ShipCollision(Asteroids *big_asteroids, Asteroids *medium_asteroids, Asteroids *small_asteroids, Player player){
+void ShipCollision(Asteroids *big_asteroids, Asteroids *medium_asteroids, Asteroids *small_asteroids, Player player, int *game_state){
             for(int i = 0; i < maxBigAsteroids; i++){
                 if(big_asteroids[i].active){
                     if(CheckCollisionCircles(player.position, player.radius, big_asteroids[i].position, big_asteroids[i].radius)){
-                        //return 0;
+                        *game_state = 0;
                     }
                 }
             }
@@ -233,7 +233,7 @@ void ShipCollision(Asteroids *big_asteroids, Asteroids *medium_asteroids, Astero
             for(int i = 0; i < maxMediumAsteroids; i++){
                 if(medium_asteroids[i].active){
                     if(CheckCollisionCircles(player.position, player.radius, medium_asteroids[i].position, medium_asteroids[i].radius)){
-                        //return 0;
+                        *game_state = 0;
                     }
                 }
             }
@@ -241,7 +241,7 @@ void ShipCollision(Asteroids *big_asteroids, Asteroids *medium_asteroids, Astero
             for(int i = 0; i < maxSmallAsteroids; i++){
                 if(small_asteroids[i].active){
                     if(CheckCollisionCircles(player.position, player.radius, small_asteroids[i].position, small_asteroids[i].radius)){
-                        //return 0;
+                        *game_state = 0;
                     }
                 }
             }
@@ -300,6 +300,19 @@ void SlowDownShip(Player *player){
             player->velocity.y = player->velocity.y - player->velocity.y * 0.01f;
 }
 
+void Menu(){
+    ClearBackground(BLACK);
+    DrawText("ASTEROIDS", 200, screenHeight/2 - 200, 80, RAYWHITE);
+    DrawText("PRESS N TO START", 300, 300, 20, RAYWHITE);
+    DrawText("PRESS H FOF HIGHSCORE", 300, 200, 20, RAYWHITE);
+}
+
+void HighScore(){
+    ClearBackground(BLACK);
+    DrawText("HIGH SCORES", 200, screenHeight/2 - 200, 40, RAYWHITE);
+    DrawText("PRESS U TO GO BACK", 300, 200, 20, RAYWHITE);
+}
+
 int main(void) {
     InitWindow(screenWidth, screenHeight, "Asteroids - Maks");
     Player player = {0};
@@ -318,9 +331,21 @@ int main(void) {
 
     float shoot_cooldown = 0.0f;
     
+    int game_state = 0;
 
     while (!WindowShouldClose()){
 
+            if (game_state == 0) {
+            
+            if (IsKeyPressed(KEY_N)) {
+                game_state = 1;
+            }
+            if (IsKeyPressed(KEY_H)) {
+                game_state = 2;
+            }
+            }  
+            
+            if (game_state == 1) {
             float dt = GetFrameTime();
             if(shoot_cooldown > 0.0f) shoot_cooldown -= dt;
 
@@ -338,15 +363,26 @@ int main(void) {
             DeleteAsteroids(&big_asteroids,&medium_asteroids,&small_asteroids);
 
             /* kolizja asteroida-statek działa na hitboxach okregow i odleglosci srednic */
-            ShipCollision(&big_asteroids,&medium_asteroids,&small_asteroids,player);
+            ShipCollision(&big_asteroids,&medium_asteroids,&small_asteroids,player,&game_state);
 
             /* kolizja pocisk-asteroida za pomoca kolizji okregu z punktem */
             BulletCollision(&big_asteroids, &medium_asteroids, &small_asteroids, bullets, player);
             
             /* (bardzo udane :) )proby zapobiegniecia nieskonczonej predkosci statku */
             SlowDownShip(&player);
-
+            }
+            
         BeginDrawing();
+            if (game_state == 0) {
+                Menu();
+            }
+            if (game_state == 2) {
+                HighScore();
+                if (IsKeyPressed(KEY_U)) {
+                game_state = 0;
+            }
+            } 
+            else if (game_state == 1) {
             ClearBackground(BLACK);
             DrawText(TextFormat("Score: %08i", player.score), 10, 10, 20, RAYWHITE);
 
@@ -392,7 +428,7 @@ int main(void) {
                     DrawPolyLines(small_asteroids[i].position, 7, small_asteroids[i].radius, small_asteroids[i].rotation, RAYWHITE);
                 }   
             }
-
+        }
         EndDrawing();
     }
 
