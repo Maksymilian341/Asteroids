@@ -89,51 +89,22 @@ void Shooting(float *shoot_cooldown, Player *player, Bullet *bullets){
                 *shoot_cooldown = 0.17f;
     }
 }
-    
-int main(void) {
-    InitWindow(screenWidth, screenHeight, "Asteroids - Maks");
-    Player player = {0};
-    player.position = (Vector2){screenWidth/2, screenHeight/2};
-    player.velocity = (Vector2){0, 0};
-    player.rotation = 0.0f; 
-    player.radius = 15.0f;
-    player.score = 0;
 
-    Bullet bullets[maxBullets] = {0};
-    Asteroids small_asteroids[maxSmallAsteroids] = {0};
-    Asteroids medium_asteroids[maxMediumAsteroids] = {0};
-    Asteroids big_asteroids[maxBigAsteroids] = {0};
+void DeleteBullet(Bullet *bullets){
+    for (int i = 0; i < maxBullets; i++){
+        if (bullets[i].active){
+            bullets[i].position.x += bullets[i].velocity.x;
+            bullets[i].position.y += bullets[i].velocity.y;
 
-    SetTargetFPS(60); 
-
-    float shoot_cooldown = 0.0f;
-    
-
-    while (!WindowShouldClose()){
-
-            float dt = GetFrameTime();
-            if(shoot_cooldown > 0.0f) shoot_cooldown -= dt;
-
-           UpdatePlayer(&player);
-
-           Shooting(&shoot_cooldown, &player, &bullets);
-
-            /* wystrzeliwanie bulleta i nadanie mu predkosci */
-            
-            /* Usuwanie bulletow ktore opuscily plansze */
-            for (int i = 0; i < maxBullets; i++){
-                if (bullets[i].active){
-                    bullets[i].position.x += bullets[i].velocity.x;
-                    bullets[i].position.y += bullets[i].velocity.y;
-
-                if (bullets[i].position.x < 0 || bullets[i].position.x > screenWidth ||
-                    bullets[i].position.y < 0 || bullets[i].position.y > screenHeight){
-                    bullets[i].active = false;
-                }
-                }
+        if (bullets[i].position.x < 0 || bullets[i].position.x > screenWidth ||
+            bullets[i].position.y < 0 || bullets[i].position.y > screenHeight){
+            bullets[i].active = false;
             }
+        }
+    }
+}
 
-            /* generowanie asteroid w losowym narozniku ekranu */
+void GeneratingAsteroids(Asteroids *big_asteroids, Asteroids *medium_asteroids, Asteroids *small_asteroids){
             for (int i = 0;i < maxBigAsteroids;i++){
                 if (!big_asteroids[i].active){
                     int temp = GetRandomValue(0, 1);
@@ -206,7 +177,11 @@ int main(void) {
                     break; 
                 }
             }
-            /* Usuwanie big asteroid ktore opuscily plansze */
+}
+
+
+void DeleteAsteroids(Asteroids *big_asteroids, Asteroids *medium_asteroids, Asteroids *small_asteroids){
+    /* Usuwanie big asteroid ktore opuscily plansze */
             for (int i = 0; i < maxBigAsteroids; i++){
                 if (big_asteroids[i].active){
                     big_asteroids[i].position.x += big_asteroids[i].velocity.x;
@@ -244,8 +219,9 @@ int main(void) {
                 }
                 }
             }
+}
 
-            /* kolizja asteroida-statek działa na hitboxach okregow i odleglosci srednic */
+void ShipCollision(Asteroids *big_asteroids, Asteroids *medium_asteroids, Asteroids *small_asteroids, Player player){
             for(int i = 0; i < maxBigAsteroids; i++){
                 if(big_asteroids[i].active){
                     if(CheckCollisionCircles(player.position, player.radius, big_asteroids[i].position, big_asteroids[i].radius)){
@@ -269,8 +245,9 @@ int main(void) {
                     }
                 }
             }
+}
 
-            /* kolizja pocisk-asteroida za pomoca kolizji okregu z punktem */
+void BulletCollision(Asteroids *big_asteroids, Asteroids *medium_asteroids, Asteroids *small_asteroids,Bullet *bullets,Player player){
             for(int i = 0; i < maxBigAsteroids;i++){
                 if (!big_asteroids[i].active) continue;
                 for(int j = 0; j < maxBullets; j++){
@@ -306,20 +283,68 @@ int main(void) {
                     }
                 }
             }
-            
-            /* (bardzo udane :) )proby zapobiegniecia nieskonczonej predkosci statku */
-            player.velocity.x *=  0.99f;
-            player.velocity.y *= 0.99f;
+}
+
+void SlowDownShip(Player *player){
+            player->velocity.x *=  0.99f;
+            player->velocity.y *= 0.99f;
             
             float maxSpeed = 3.5f;
-            float currentSpeed = sqrtf(player.velocity.x * player.velocity.x + player.velocity.y * player.velocity.y);
+            float currentSpeed = sqrtf(player->velocity.x * player->velocity.x + player->velocity.y * player->velocity.y);
             if(currentSpeed > maxSpeed){
-                player.velocity.x = (player.velocity.x / currentSpeed) * maxSpeed;
-                player.velocity.y = (player.velocity.y / currentSpeed) * maxSpeed;
+                player->velocity.x = (player->velocity.x / currentSpeed) * maxSpeed;
+                player->velocity.y = (player->velocity.y / currentSpeed) * maxSpeed;
             }
 
-            player.velocity.x = player.velocity.x - player.velocity.x * 0.01f;
-            player.velocity.y = player.velocity.y - player.velocity.y * 0.01f;
+            player->velocity.x = player->velocity.x - player->velocity.x * 0.01f;
+            player->velocity.y = player->velocity.y - player->velocity.y * 0.01f;
+}
+
+int main(void) {
+    InitWindow(screenWidth, screenHeight, "Asteroids - Maks");
+    Player player = {0};
+    player.position = (Vector2){screenWidth/2, screenHeight/2};
+    player.velocity = (Vector2){0, 0};
+    player.rotation = 0.0f; 
+    player.radius = 15.0f;
+    player.score = 0;
+
+    Bullet bullets[maxBullets] = {0};
+    Asteroids small_asteroids[maxSmallAsteroids] = {0};
+    Asteroids medium_asteroids[maxMediumAsteroids] = {0};
+    Asteroids big_asteroids[maxBigAsteroids] = {0};
+
+    SetTargetFPS(60); 
+
+    float shoot_cooldown = 0.0f;
+    
+
+    while (!WindowShouldClose()){
+
+            float dt = GetFrameTime();
+            if(shoot_cooldown > 0.0f) shoot_cooldown -= dt;
+
+            UpdatePlayer(&player);
+            /* wystrzeliwanie bulleta i nadanie mu predkosci */
+            Shooting(&shoot_cooldown, &player, &bullets);
+
+            /* Usuwanie bulletow ktore opuscily plansze */
+            DeleteBullet(&bullets);
+            /* generowanie asteroid w losowym narozniku ekranu */
+            GeneratingAsteroids(&big_asteroids,&medium_asteroids,&small_asteroids);
+
+            
+            /* Usuwanie big asteroid ktore opuscily plansze */
+            DeleteAsteroids(&big_asteroids,&medium_asteroids,&small_asteroids);
+
+            /* kolizja asteroida-statek działa na hitboxach okregow i odleglosci srednic */
+            ShipCollision(&big_asteroids,&medium_asteroids,&small_asteroids,player);
+
+            /* kolizja pocisk-asteroida za pomoca kolizji okregu z punktem */
+            BulletCollision(&big_asteroids, &medium_asteroids, &small_asteroids, bullets, player);
+            
+            /* (bardzo udane :) )proby zapobiegniecia nieskonczonej predkosci statku */
+            SlowDownShip(&player);
 
         BeginDrawing();
             ClearBackground(BLACK);
