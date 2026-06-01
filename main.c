@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <ctype.h>
+#include <string.h>
 
 #define screenWidth 800
 #define screenHeight 600
@@ -11,7 +12,8 @@
 #define maxSmallAsteroids 6
 #define maxMediumAsteroids 5
 #define maxBigAsteroids 3
-#define maxHighScores 5
+#define maxHighScores 6
+
 
 
 typedef struct Player{
@@ -20,6 +22,7 @@ typedef struct Player{
     float rotation;
     float radius;
     int score;
+    
 }Player;
 
 typedef struct Bullet{
@@ -36,12 +39,52 @@ typedef struct Asteroids{
     bool active;
 }Asteroids;
 
+
+void SaveHighScore(Player *player){
+    int high_scores[maxHighScores + 1] = {0};
+    int count = 0;
+    FILE* plik = fopen("high_scores.txt", "r");
+    if (plik != NULL) { 
+        while (count < maxHighScores && fscanf(plik, "%d", &high_scores[count]) == 1) {
+            count++;
+        }
+        fclose(plik);
+    }
+    high_scores[count] = player->score;
+    count++;
+
+                
+    for (int j = 0; j < count - 1; j++) {
+        for (int k = 0; k < count - j - 1; k++) {
+            if (high_scores[k] < high_scores[k + 1]) {
+                int temp = high_scores[k];
+                high_scores[k] = high_scores[k + 1];
+                high_scores[k + 1] = temp;
+            }
+        }
+    }
+
+    plik = fopen("high_scores.txt", "w");
+    if (plik != NULL) {
+        int limit = (count < maxHighScores) ? count : maxHighScores;
+        for (int j = 0; j < limit; j++) {
+            fprintf(plik, "%d\n", high_scores[j]);
+        }
+        fclose(plik);
+    }
+}
+void EndScreen(Player player, int *game_state){
+    ClearBackground(BLACK);
+    DrawText(TextFormat("YOUR SCORE: %06i",player.score), 200, screenHeight/2 - 200, 40, RAYWHITE);
+    DrawText("PRESS ENTER TO SAVE YOUR SCORE", 220, screenHeight - 40, 20, RAYWHITE);    
+}
+
 void NewGame(Asteroids *big_asteroids, Asteroids *medium_asteroids, Asteroids *small_asteroids,Bullet *bullets,Player *player, int *game_state){
     player->position = (Vector2){screenWidth/2, screenHeight/2};
     player->velocity = (Vector2){0, 0};
     player->rotation = 0.0f;
     player->radius = 15.0f;
-    player->score = 0;
+    //player->score = 0;
 
     for(int i = 0; i < maxBullets; i++)
         bullets[i].active = false;
@@ -55,7 +98,7 @@ void NewGame(Asteroids *big_asteroids, Asteroids *medium_asteroids, Asteroids *s
     for(int i = 0; i < maxSmallAsteroids; i++)
         small_asteroids[i].active = false;
 
-    *game_state = 0;
+    *game_state = 3;
 }
 
 void UpdatePlayer(Player *player){
@@ -249,37 +292,8 @@ void ShipCollision(Asteroids *big_asteroids, Asteroids *medium_asteroids, Astero
             for(int i = 0; i < maxBigAsteroids; i++){
                 if(big_asteroids[i].active){
                     if(CheckCollisionCircles(player->position, player->radius, big_asteroids[i].position, big_asteroids[i].radius)){
-                        int high_scores[maxHighScores + 1] = {0};
-                        int count = 0;
-                        FILE* plik = fopen("high_scores.txt", "r");
-                        if (plik != NULL) {
-                            while (count < maxHighScores && fscanf(plik, "%d", &high_scores[count]) == 1) {
-                            count++;
-                        }
-                        fclose(plik);
-                        }
-                        high_scores[count] = player->score;
-                        count++;
-
-                
-                        for (int j = 0; j < count - 1; j++) {
-                            for (int k = 0; k < count - j - 1; k++) {
-                                if (high_scores[k] < high_scores[k + 1]) {
-                                    int temp = high_scores[k];
-                                    high_scores[k] = high_scores[k + 1];
-                                    high_scores[k + 1] = temp;
-                                }
-                            }
-                        }
-
-                        plik = fopen("high_scores.txt", "w");
-                        if (plik != NULL) {
-                            int limit = (count < maxHighScores) ? count : maxHighScores;
-                            for (int j = 0; j < limit; j++) {
-                                fprintf(plik, "%d\n", high_scores[j]);
-                            }
-                            fclose(plik);
-                        }
+                        SaveHighScore(player);
+                        //EndScreen(*player, game_state);
                         NewGame(big_asteroids,medium_asteroids,small_asteroids,bullets,player,game_state);
                     }
                 }
@@ -288,37 +302,8 @@ void ShipCollision(Asteroids *big_asteroids, Asteroids *medium_asteroids, Astero
             for(int i = 0; i < maxMediumAsteroids; i++){
                 if(medium_asteroids[i].active){
                     if(CheckCollisionCircles(player->position, player->radius, medium_asteroids[i].position, medium_asteroids[i].radius)){
-                        int high_scores[maxHighScores + 1] = {0};
-                        int count = 0;
-                        FILE* plik = fopen("high_scores.txt", "r");
-                        if (plik != NULL) {
-                            while (count < maxHighScores && fscanf(plik, "%d", &high_scores[count]) == 1) {
-                            count++;
-                        }
-                        fclose(plik);
-                        }
-                        high_scores[count] = player->score;
-                        count++;
-
-                
-                        for (int j = 0; j < count - 1; j++) {
-                            for (int k = 0; k < count - j - 1; k++) {
-                                if (high_scores[k] < high_scores[k + 1]) {
-                                    int temp = high_scores[k];
-                                    high_scores[k] = high_scores[k + 1];
-                                    high_scores[k + 1] = temp;
-                                }
-                            }
-                        }
-
-                        plik = fopen("high_scores.txt", "w");
-                        if (plik != NULL) {
-                            int limit = (count < maxHighScores) ? count : maxHighScores;
-                            for (int j = 0; j < limit; j++) {
-                                fprintf(plik, "%d\n", high_scores[j]);
-                            }
-                            fclose(plik);
-                        }
+                        SaveHighScore(player);
+                        //EndScreen(*player, game_state);
                         NewGame(big_asteroids,medium_asteroids,small_asteroids,bullets,player,game_state);
                     }
                 }
@@ -327,38 +312,9 @@ void ShipCollision(Asteroids *big_asteroids, Asteroids *medium_asteroids, Astero
             for(int i = 0; i < maxSmallAsteroids; i++){
                 if(small_asteroids[i].active){
                     if(CheckCollisionCircles(player->position, player->radius, small_asteroids[i].position, small_asteroids[i].radius)){
-                        int high_scores[maxHighScores + 1] = {0};
-                        int count = 0;
-                        FILE* plik = fopen("high_scores.txt", "r");
-                        if (plik != NULL) {
-                            while (count < maxHighScores && fscanf(plik, "%d", &high_scores[count]) == 1) {
-                            count++;
-                        }
-                        fclose(plik);
-                        }
-                        high_scores[count] = player->score;
-                        count++;
-
-                
-                        for (int j = 0; j < count - 1; j++) {
-                            for (int k = 0; k < count - j - 1; k++) {
-                                if (high_scores[k] < high_scores[k + 1]) {
-                                    int temp = high_scores[k];
-                                    high_scores[k] = high_scores[k + 1];
-                                    high_scores[k + 1] = temp;
-                                }
-                            }
-                        }
-
-                        plik = fopen("high_scores.txt", "w");
-                        if (plik != NULL) {
-                            int limit = (count < maxHighScores) ? count : maxHighScores;
-                            for (int j = 0; j < limit; j++) {
-                                fprintf(plik, "%d\n", high_scores[j]);
-                            }
-                            fclose(plik);
-                        }
+                        SaveHighScore(player);
                         NewGame(big_asteroids,medium_asteroids,small_asteroids,bullets,player,game_state);
+                        //EndScreen(*player, game_state);
                     }
                 }
             }
@@ -419,6 +375,16 @@ void Menu(){
     DrawText("ASTEROIDS", 185, screenHeight/2 - 200, 80, RAYWHITE);
     DrawText("PRESS N TO START", 310, screenHeight/2, 20, RAYWHITE);
     DrawText("PRESS H FOF HIGHSCORE", 277, screenHeight/2 + 40, 20, RAYWHITE);
+    /*
+    for(int i = 0; i < screenWidth; i++){
+        for(int j = 0; j < screenHeight; j++){
+            int if_star = GetRandomValue(0,1000);
+            if(if_star == 67){
+                DrawCircle(i, j, 2, RAYWHITE);
+            }
+        }
+    }
+    */
 }
 
 void HighScore(){
@@ -444,7 +410,6 @@ void HighScore(){
     fclose(plik);
 }
 
-
 int main(void) {
     InitWindow(screenWidth, screenHeight, "Asteroids - Maks");
     Player player = {0};
@@ -458,6 +423,7 @@ int main(void) {
     Asteroids small_asteroids[maxSmallAsteroids] = {0};
     Asteroids medium_asteroids[maxMediumAsteroids] = {0};
     Asteroids big_asteroids[maxBigAsteroids] = {0};
+    
 
     SetTargetFPS(60); 
 
@@ -468,6 +434,14 @@ int main(void) {
 
 
     while (!WindowShouldClose()){
+
+            if (game_state == 3){
+                if (IsKeyPressed(KEY_ENTER)) {
+                player.score = 0;
+                //player.name[10] = ""; 
+                game_state = 0;
+            }
+            }
 
             if (game_state == 0) {
             
@@ -507,6 +481,11 @@ int main(void) {
             }
             
         BeginDrawing();
+
+            if (game_state == 3){
+               EndScreen(player, &game_state);
+            }
+
             if (game_state == 0) {
                 Menu();
             }
@@ -516,6 +495,7 @@ int main(void) {
                 game_state = 0;
             }
             } 
+            
             else if (game_state == 1) {
             ClearBackground(BLACK);
             DrawText(TextFormat("Score: %06i", player.score), 10, 10, 20, RAYWHITE);
