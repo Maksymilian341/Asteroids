@@ -66,8 +66,7 @@ void SaveHighScore(Player *player){
 
     plik = fopen("high_scores.txt", "w");
     if (plik != NULL) {
-        int limit = (count < maxHighScores) ? count : maxHighScores;
-        for (int j = 0; j < limit; j++) {
+        for (int j = 0; j < 6; j++) {
             fprintf(plik, "%d\n", high_scores[j]);
         }
         fclose(plik);
@@ -438,7 +437,6 @@ int main(void) {
             if (game_state == 3){
                 if (IsKeyPressed(KEY_ENTER)) {
                 player.score = 0;
-                //player.name[10] = ""; 
                 game_state = 0;
             }
             }
